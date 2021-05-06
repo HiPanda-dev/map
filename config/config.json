@@ -1,0 +1,16 @@
+{
+	"map":[
+		{"id":"global", "name":"Global", "url":"https://izitour.com/media/drawmap/res/config/route/global.json"},
+		{"id":"VN", "name":"Viet Nam", "url":"https://izitour.com/media/drawmap/res/config/route/viet-nam.json"},
+		{"id":"LA", "name":"Lao", "url":"https://izitour.com/media/drawmap/res/config/route/lao.json"},
+		{"id":"KH", "name":"Cambodge", "url":"https://izitour.com/media/drawmap/res/config/route/cambodge.json"}
+	],
+	"driver":[
+		{"id":1, "name":"motorbike", "url":"/res/assets/driver/car.png"},
+		{"id":2, "name":"bicycle", "url":"/res/assets/driver/car.png"},
+		{"id":3, "name":"ship", "url":"/res/assets/driver/ship.png"},
+		{"id":4, "name":"car", "url":"/res/assets/driver/car.png"},
+		{"id":5, "name":"plane", "url":"/res/assets/driver/plane.png"},
+		{"id":6, "name":"train", "url":"/res/assets/driver/train.png"}
+	]
+}

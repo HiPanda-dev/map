@@ -1,0 +1,58 @@
+{
+	"id":"global",
+	"routes": [
+		{	
+			"id":"VN_HaNoi-LA_LuangPrabang", 
+			"name":"VN_HaNoi-LA_LuangPrabang.png", 
+			"driver":[
+				{ "id" : 1, "pos":null},
+				{ "id" : 2, "pos":null},
+				{ "id" : 3, "pos":null},
+				{ "id" : 4, "pos":null},
+				{ "id" : 5, "pos":"100x100"},
+				{ "id" : 6, "pos":null}
+			]
+		}, 
+		{	
+			"id":"LA_LuangPrabang-VN_HaNoi", 
+			"name":"LA_LuangPrabang-VN_HaNoi.png", 
+			"driver":[
+				{ "id" : 1, "pos":null},
+				{ "id" : 2, "pos":null},
+				{ "id" : 3, "pos":null},
+				{ "id" : 4, "pos":null},
+				{ "id" : 5, "pos":"367.8x464.95"},
+				{ "id" : 6, "pos":null}
+			]
+		},
+		{	
+			"id":"global-VN_HaNoi", 
+			"name":"global-VN_HaNoi.png", 
+			"driver":[
+				{ "id" : 1, "pos":null},
+				{ "id" : 2, "pos":null},
+				{ "id" : 3, "pos":null},
+				{ "id" : 4, "pos":null},
+				{ "id" : 5, "pos":"1037.4x166.25"},
+				{ "id" : 6, "pos":null}
+			]
+		},
+		{	
+			"id":"VN_HaNoi-global", 
+			"name":"VN_HaNoi-global.png", 
+			"driver":[
+				{ "id" : 1, "pos":null},
+				{ "id" : 2, "pos":null},
+				{ "id" : 3, "pos":null},
+				{ "id" : 4, "pos":null},
+				{ "id" : 5, "pos":"1037.4x322.25"},
+				{ "id" : 6, "pos":null}
+			]
+		}
+	],
+	"key": [
+		{"id": "HaNoi", "name": "Hà Nội"},
+		{"id": "LuangPrabang", "name": "Luang Prabang"}
+	]
+}
+	
