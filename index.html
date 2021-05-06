@@ -1,0 +1,71 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="authoring-tool" content="Adobe_Animate_CC">
+        <title>ui_viet_nam</title>
+        <style>
+            #animation_container {
+                position:absolute;
+                margin:auto;
+                left:0;right:0;
+            }
+        </style>
+        <script src="https://zimjs.org/cdn/1.3.3/createjs.js"></script>
+        <script>
+            var zon = true;
+            var zns = false;
+        </script>
+        <script src="https://zimjs.org/cdn/cat/04/zim.js"></script>
+        <script src="https://code.createjs.com/1.0.0/tweenjs.min.js"></script>
+        <script src="ui_viet_nam.js"></script>
+        <script src="game.js"></script>
+        <script>
+            var scaling = "fit";
+            var width = 1024;
+            var height = 768;
+            var frame = new Frame(scaling, width, height);
+            frame.on("ready", ()=>{
+                zog("ready from ZIM Frame");
+                var stage = frame.stage;
+                var stageW = frame.width;
+                var stageH = frame.height;
+
+                frame.outerColor = frame.darker;
+                frame.color = frame.dark;
+
+                frame.loadAssets(["action1.png", "action2.png", "action3.png", "action4.png", "action5.png", "action6.png", "action7.png",
+                                    "motobike.png", "bike.png", "ship.png", "car.png", "plane.png", "train.png"], "./images/");
+                frame.on("complete", function() {
+                    var comp=AdobeAn.getComposition("1FD19714E65D4E4DB044A37B9F30D6F9");
+                    var lib=comp.getLibrary();
+                    var loader = new createjs.LoadQueue(false);
+                    loader.addEventListener("fileload", function(evt){handleFileLoad(evt,comp)});
+                    loader.addEventListener("complete", function(evt){handleComplete(evt,comp)});
+                    var lib=comp.getLibrary();
+                    loader.loadManifest(lib.properties.manifest);
+
+                    function handleFileLoad(evt, comp) {
+                        var images=comp.getImages();	
+                        if (evt && (evt.item.type == "image")) { images[evt.item.id] = evt.result; }	
+                    }
+                    
+                    function handleComplete(evt,comp) {
+                        var lib=comp.getLibrary();
+                        var ss=comp.getSpriteSheet();
+                        var queue = evt.target;
+                        var ssMetadata = lib.ssMetadata;
+                        for(i=0; i<ssMetadata.length; i++) {
+                            ss[ssMetadata[i].name] = new createjs.SpriteSheet( {"images": [queue.getResult(ssMetadata[i].name)], "frames": ssMetadata[i].frames} )
+                        }
+                        const content = new Container(stage.width, stage.height).centerReg().addTo();
+                        var game = zimify(new lib.ui_viet_nam()).addTo(content);
+                        // content.childrenToBitmap();
+                        
+                        showGame(lib, game, game.mcGame, game.map, stage, content, frame);
+                    }
+                });                
+                stage.update();
+            });
+        </script>
+    </head>
+</html>
