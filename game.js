@@ -28,15 +28,15 @@ var isCapture = false;
 var startCapture = false;
 var dontDrag = false;
         
-var WIDTH;
-var HEIGHT;
+var WIDTH, HEIGHT;
+var GAME_WIDTH, GAME_HEIGHT;
 
 // Viet Nam
 var curPosRoute;
 var listCountPoint = [];
 var isFirst = false;
 
-function showGame(_lib, _game, _mcGame, _mcMap, _stage, _content, _frame){
+function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight){
     createjs.Touch.enable(_stage, false, true);
     _stage.preventSelection = false
     this.stage = _stage;
@@ -44,30 +44,67 @@ function showGame(_lib, _game, _mcGame, _mcMap, _stage, _content, _frame){
     this.frame = _frame;
     this.lib = _lib;
     this.game = _game;
-    this.mcGame = _mcGame;
-    this.mcMap = _mcMap;
+    this.mcGame = game.mcGame;
+    this.mcMap = game.map;
 
     this.WIDTH = stage.width;
     this.HEIGHT = stage.height;
+    this.GAME_WIDTH = _gameWidth;
+    this.GAME_HEIGHT = _gameHeight;
+
+    let ratio = this.HEIGHT / this.GAME_HEIGHT;
+    game.scaleX = game.scaleY = ratio;
+    game.x = (this.WIDTH - this.GAME_WIDTH * ratio) / 2;
+
+    var handleScroll = function (e) {
+        var delta = e.wheelDelta ? e.wheelDelta/1000 : e.detail ? -e.detail : 0;
+        var p = game.globalToLocal(stage.mouseX, stage.mouseY);
+        var scale = Math.max(0, Math.min(game.scaleX + delta, 3));
+        
+        if(e.wheelDelta < 0){
+            if(this.curZoom <= 0) return;
+            this.curZoom--;
+        }else{
+            if (this.curZoom == 30) return;
+            this.curZoom++;
+        }
+        game.scaleX = game.scaleY = scale;
+        var p2 = game.globalToLocal(stage.mouseX, stage.mouseY);
+        game.x += (p2.x - p.x) * scale;
+        game.y += (p2.y - p.y) * scale;
+
+        if (this.game.width < WIDTH) this.game.width = WIDTH;
+        if (this.game.height < HEIGHT) this.game.height = HEIGHT;
+        
+        if(game.x > 0) game.x = 0;
+        if(game.y > 0) game.y = 0;
+        if(game.x + game.width < WIDTH) game.x = WIDTH - game.width;
+        if(game.y + game.height < HEIGHT) game.y = HEIGHT - game.height;
+
+        stage.update();
+    }.bind(this);
+    
+    // this.stage.canvas.addEventListener('DOMMouseScroll', handleScroll, false);
+    this.stage.canvas.addEventListener('mousewheel', handleScroll, false);
 
     //init driver
     for (let index = 0; index < 6; index++) {
-        let button = new Button({label:"", backing:frame.asset(driverNameArray[index]), }).loc(850, -15);
+        let button = new Button({label:"", backing:frame.asset(driverNameArray[index]), }).loc(frame.width - 150, -25);
         button.on("click", function(e){
             if (isChoose) {
                 isChoose = false;
                 for (var i = 0; i < listDriver.length; i++) {
                     var mc = listDriver[i];
                     mc.visible = true;
-                    mc.animate({x:850, y:-15 + i * 55}, i * 0.3, "backOut");
+                    mc.animate({x:frame.width - 150, y:-25 + i * 45}, i * 0.3, "backOut");
                     stage.update();
                 }
             } else {
                 isChoose = true;
                 for (var i = 0; i < listDriver.length; i++) {
                     var mc = listDriver[i];
-                    mc.x = 850;
-                    mc.y = -15;
+                    mc.x = frame.width - 150;
+                    mc.y = -25;
                     // mc.visible = true;
                     // mc.animate({x:850, y:-15}, 1, "backIn");
                     stage.update();
@@ -79,7 +116,9 @@ function showGame(_lib, _game, _mcGame, _mcMap, _stage, _content, _frame){
     }
 
     //init button setting
-    btnNewRound = new Button({label:"", backing:frame.asset("action1.png"), rollBacking:frame.asset("action1.png"), }).loc(-80, -15);
+    // var button2 = new Button(200, 70, "dasdads", "black", "#222", "white", 2, 0)
+    btnNewRound = new Button({label:"", backing:frame.asset("action1.png"), rollBacking:frame.asset("action1.png"), }).loc(-90, -25);
+    // btnNewRound.width = 20;
     btnNewRound.on("click", function(e){
         if (isFirst && mcStartPoint && !mcEndPoint) {
             mcStartPoint.mcAnim.visible = false;
@@ -93,47 +132,47 @@ function showGame(_lib, _game, _mcGame, _mcMap, _stage, _content, _frame){
         btnCome.alpha = 1;
         this.STATE = 0;
     });
-    btnCapture = new Button({label:"", backing:frame.asset("action2.png"), rollBacking:frame.asset("action2.png"), }).loc(-10, -15);
+    btnCapture = new Button({label:"", backing:frame.asset("action2.png"), rollBacking:frame.asset("action2.png"), }).loc(-45, -25);
     btnCapture.on("click", function(e){
-        game.noDrag();
+        enableDrag(false);
         selectObj = new Shape(WIDTH, HEIGHT).addTo().ble("difference");
         isCapture = true;
         showSettingButton(false);
         hideAllPointNotCapture();
         stage.update();
     });
-    btnResetAll = new Button({label:"", backing:frame.asset("action3.png"), rollBacking:frame.asset("action3.png"), }).loc(60, -15);
+    btnResetAll = new Button({label:"", backing:frame.asset("action3.png"), rollBacking:frame.asset("action3.png"), }).loc(0, -25);
     btnResetAll.on("click", function(e){
         onResetAll();
     });
-    btnGo = new Button({label:"", backing:frame.asset("action4.png"), rollBacking:frame.asset("action4.png"), }).loc(130, -15);
+    btnGo = new Button({label:"", backing:frame.asset("action4.png"), rollBacking:frame.asset("action4.png"), }).loc(45, -25);
     btnGo.on("click", function(e){
         btnGo.alpha = 0.5;
         btnCome.alpha = 1;
         
         this.STATE = 1;
     });
-    btnCome = new Button({label:"", backing:frame.asset("action5.png"), rollBacking:frame.asset("action5.png"), }).loc(200, -15);
+    btnCome = new Button({label:"", backing:frame.asset("action5.png"), rollBacking:frame.asset("action5.png"), }).loc(90, -25);
     btnCome.on("click", function(e){
         btnCome.alpha = 0.5;
         btnGo.alpha = 1;
         
         this.STATE = 2;
     });
-    btnZoomIn = new Button({label:"", backing:frame.asset("action6.png"), rollBacking:frame.asset("action6.png"), }).loc(270, -15);
-    btnZoomIn.on("click", function(e){
-        if(curZoom == 50) return;
-        curZoom++;
-        content.sca(1 + (curZoom * 0.04));
-        stage.update();
-    });
-    btnZoomOut = new Button({label:"", backing:frame.asset("action7.png"), rollBacking:frame.asset("action7.png"), }).loc(340, -15);
-    btnZoomOut.on("click", function(e){
-        if(curZoom <= 0) return;
-        curZoom--;
-        content.sca(1 + (curZoom * 0.04));
-        stage.update();
-    });
+    // btnZoomIn = new Button({label:"", backing:frame.asset("action6.png"), rollBacking:frame.asset("action6.png"), }).loc(270, -15);
+    // btnZoomIn.on("click", function(e){
+    //     if(curZoom == 50) return;
+    //     curZoom++;
+    //     content.sca(1 + (curZoom * 0.04));
+    //     stage.update();
+    // });
+    // btnZoomOut = new Button({label:"", backing:frame.asset("action7.png"), rollBacking:frame.asset("action7.png"), }).loc(340, -15);
+    // btnZoomOut.on("click", function(e){
+    //     if(curZoom <= 0) return;
+    //     curZoom--;
+    //     content.sca(1 + (curZoom * 0.04));
+    //     stage.update();
+    // });
 
     this.onDisableNewRound();
 
@@ -181,15 +220,6 @@ function showGame(_lib, _game, _mcGame, _mcMap, _stage, _content, _frame){
     });
 
     // Init Map
-    game.drag({currentTarget:true});
-
-    game.on("pressmove", () => {
-        if(game.x > 0) game.x = 0;
-        if(game.y > 0) game.y = 0;
-        if(game.x + game.width < WIDTH) game.x = WIDTH - game.width;
-        if(game.y + game.height < HEIGHT) game.y = HEIGHT - game.height;
-    });
-    stage.update();
 
     mcContainer = new createjs.MovieClip();
     mcContainer.x = 5;
@@ -219,7 +249,6 @@ function showGame(_lib, _game, _mcGame, _mcMap, _stage, _content, _frame){
     content.on("pressup", () => {
         if(!startCapture) return;
         startCapture = false;
-        var pic = frame.asset(driverNameArray[this.curDriver - 1]).clone().loc(frame.mouseX - 55, frame.mouseY - 55).addTo(content);
         let snap = content.cache(...sel).cacheCanvas;
         copy = new Bitmap(snap);
         content.uncache();
@@ -229,14 +258,48 @@ function showGame(_lib, _game, _mcGame, _mcMap, _stage, _content, _frame){
         const loader = new Loader();
         loader.save(copy);
 
-        pic.removeFrom(content);
         showSettingButton(true);
         isCapture = false;
-        this.game.drag({currentTarget:true});
+        enableDrag(true);
         stage.update();
     });
     
     this.setSelectPos(3);
+
+    enableDrag(true);
+
+    // frame.on("keydown", e=>{
+    //     if(e.keyCode == 65){
+    //         if(curZoom == 50) return;
+    //         curZoom++;
+    //         content.sca(1 + (curZoom * 0.04));
+    //         stage.update();
+    //     }
+    //     if(e.keyCode == 68){
+    //         if(curZoom <= 0) return;
+    //         curZoom--;
+    //         content.sca(1 + (curZoom * 0.04));
+    //         stage.update();
+    //     }
+    // });
+}
+
+var keyEvent;
+function enableDrag(enable) {
+    if(enable){
+        game.drag({currentTarget:true});
+
+        let keyEvent = game.on("pressmove", () => {
+            if(game.x > 0) game.x = 0;
+            if(game.y > 0) game.y = 0;
+            if(game.x + game.width < WIDTH) game.x = WIDTH - game.width;
+            if(game.y + game.height < HEIGHT) game.y = HEIGHT - game.height;
+        });
+    }else{
+        game.noDrag();
+
+        game.off("pressmove", keyEvent);
+    }
 }
 
 //Map
@@ -261,7 +324,7 @@ function setSelectPos(id) {
 
 //Function setting
 function showSettingButton(show) {
-    btnNewRound.visible = btnResetAll.visible = btnCapture.visible = btnCome.visible = btnGo.visible = btnZoomIn.visible = btnZoomOut.visible = show;
+    btnNewRound.visible = btnResetAll.visible = btnCapture.visible = btnCome.visible = btnGo.visible = show;
     for (let index = 0; index < this.listDriver.length; index++) {
         var driver = this.listDriver[index];
         if(show){

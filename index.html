@@ -21,8 +21,9 @@
         <script src="game.js"></script>
         <script>
             var scaling = "fit";
-            var width = 1024;
-            var height = 768;
+            var ratio = 1.38;
+            var width = window.innerHeight / ratio;
+            var height = window.innerHeight;
             var frame = new Frame(scaling, width, height);
             frame.on("ready", ()=>{
                 zog("ready from ZIM Frame");
@@ -61,7 +62,7 @@
                         var game = zimify(new lib.ui_viet_nam()).addTo(content);
                         // content.childrenToBitmap();
                         
-                        showGame(lib, game, game.mcGame, game.map, stage, content, frame);
+                        showGame(lib, game, stage, content, frame, lib.properties.width, lib.properties.height);
                     }
                 });                
                 stage.update();
