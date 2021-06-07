@@ -35,6 +35,7 @@ var GAME_WIDTH, GAME_HEIGHT;
 var curPosRoute;
 var listCountPoint = [];
 var isFirst = false;
+var ratio;
 
 function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight){
     createjs.Touch.enable(_stage, false, true);
@@ -52,15 +53,11 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
     this.GAME_WIDTH = _gameWidth;
     this.GAME_HEIGHT = _gameHeight;
 
-    let ratio = this.HEIGHT / this.GAME_HEIGHT;
+    ratio = this.HEIGHT / this.GAME_HEIGHT;
     game.scaleX = game.scaleY = ratio;
     game.x = (this.WIDTH - this.GAME_WIDTH * ratio) / 2;
 
     var handleScroll = function (e) {
-        var delta = e.wheelDelta ? e.wheelDelta/1000 : e.detail ? -e.detail : 0;
-        var p = game.globalToLocal(stage.mouseX, stage.mouseY);
-        var scale = Math.max(0, Math.min(game.scaleX + delta, 3));
-        
         if(e.wheelDelta < 0){
             if(this.curZoom <= 0) return;
             this.curZoom--;
@@ -68,10 +65,15 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
             if (this.curZoom == 30) return;
             this.curZoom++;
         }
-        game.scaleX = game.scaleY = scale;
+
+        var delta = e.wheelDelta ? e.wheelDelta/1000 : e.detail ? -e.detail : 0;
+        var p = game.globalToLocal(stage.mouseX, stage.mouseY);
+        ratio = Math.max(0.0001, Math.min(game.scaleX + delta, 3));
+        
+        game.scaleX = game.scaleY = ratio;
         var p2 = game.globalToLocal(stage.mouseX, stage.mouseY);
-        game.x += (p2.x - p.x) * scale;
-        game.y += (p2.y - p.y) * scale;
+        game.x += (p2.x - p.x) * ratio;
+        game.y += (p2.y - p.y) * ratio;
 
         if (this.game.width < WIDTH) this.game.width = WIDTH;
         if (this.game.height < HEIGHT) this.game.height = HEIGHT;
@@ -84,7 +86,7 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         stage.update();
     }.bind(this);
     
-    // this.stage.canvas.addEventListener('DOMMouseScroll', handleScroll, false);
+    this.stage.canvas.addEventListener('DOMMouseScroll', handleScroll, false);
     this.stage.canvas.addEventListener('mousewheel', handleScroll, false);
 
     //init driver
@@ -96,7 +98,9 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
                 for (var i = 0; i < listDriver.length; i++) {
                     var mc = listDriver[i];
                     mc.visible = true;
-                    mc.animate({x:frame.width - 150, y:-25 + i * 45}, i * 0.3, "backOut");
+                    mc.x = frame.width - 150;
+                    mc.y = -25 + i * 45;
+                    // mc.animate({x:frame.width - 150, y:-25 + i * 45}, i * 0.3, "backOut");
                     stage.update();
                 }
             } else {
@@ -105,7 +109,7 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
                     var mc = listDriver[i];
                     mc.x = frame.width - 150;
                     mc.y = -25;
-                    // mc.visible = true;
+                    mc.visible = false;
                     // mc.animate({x:850, y:-15}, 1, "backIn");
                     stage.update();
                 }
@@ -116,21 +120,9 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
     }
 
     //init button setting
-    // var button2 = new Button(200, 70, "dasdads", "black", "#222", "white", 2, 0)
     btnNewRound = new Button({label:"", backing:frame.asset("action1.png"), rollBacking:frame.asset("action1.png"), }).loc(-90, -25);
-    // btnNewRound.width = 20;
     btnNewRound.on("click", function(e){
-        if (isFirst && mcStartPoint && !mcEndPoint) {
-            mcStartPoint.mcAnim.visible = false;
-        }
-        mcStartPoint = null;
-        mcEndPoint = null;
-        showAbleRouteSelect();
-    
-        this.onDisableNewRound();
-        btnGo.alpha = 1;
-        btnCome.alpha = 1;
-        this.STATE = 0;
+        onNewRound();
     });
     btnCapture = new Button({label:"", backing:frame.asset("action2.png"), rollBacking:frame.asset("action2.png"), }).loc(-45, -25);
     btnCapture.on("click", function(e){
@@ -147,17 +139,11 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
     });
     btnGo = new Button({label:"", backing:frame.asset("action4.png"), rollBacking:frame.asset("action4.png"), }).loc(45, -25);
     btnGo.on("click", function(e){
-        btnGo.alpha = 0.5;
-        btnCome.alpha = 1;
-        
-        this.STATE = 1;
+        onGo();
     });
     btnCome = new Button({label:"", backing:frame.asset("action5.png"), rollBacking:frame.asset("action5.png"), }).loc(90, -25);
     btnCome.on("click", function(e){
-        btnCome.alpha = 0.5;
-        btnGo.alpha = 1;
-        
-        this.STATE = 2;
+        onCome();
     });
     // btnZoomIn = new Button({label:"", backing:frame.asset("action6.png"), rollBacking:frame.asset("action6.png"), }).loc(270, -15);
     // btnZoomIn.on("click", function(e){
@@ -249,6 +235,23 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
     content.on("pressup", () => {
         if(!startCapture) return;
         startCapture = false;
+        let oldPosX = game.x;
+        let oldPosY = game.y;
+
+        let p = game.globalToLocal(selectX, selectY);
+        game.scaleX = game.scaleY = 1;
+        let p2 = game.globalToLocal(selectX, selectY);
+        game.x += (p2.x - p.x) * 1;
+        game.y += (p2.y - p.y) * 1;
+        let width = (frame.mouseX - selectX) / this.ratio;
+        let height = (frame.mouseY - selectY) / this.ratio;
+        sel = [selectX, selectY, width, height];
+
+        let posNoteX = (width > 0 ? selectX : (selectX + width)) + 10;
+        let posNoteY = (height > 0 ? selectY + height : selectY) - 80;
+        let pic = frame.asset("note.png").clone().loc(posNoteX, posNoteY).addTo(content);
+
+        selectObj.c().s(red).ss(2).sd([10,10],5).dr(...sel);
         let snap = content.cache(...sel).cacheCanvas;
         copy = new Bitmap(snap);
         content.uncache();
@@ -257,6 +260,11 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         sel = null;
         const loader = new Loader();
         loader.save(copy);
+
+        pic.removeFrom(content);
+        game.scaleX = game.scaleY = ratio;
+        game.x = oldPosX;
+        game.y = oldPosY;
 
         showSettingButton(true);
         isCapture = false;
@@ -267,21 +275,6 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
     this.setSelectPos(3);
 
     enableDrag(true);
-
-    // frame.on("keydown", e=>{
-    //     if(e.keyCode == 65){
-    //         if(curZoom == 50) return;
-    //         curZoom++;
-    //         content.sca(1 + (curZoom * 0.04));
-    //         stage.update();
-    //     }
-    //     if(e.keyCode == 68){
-    //         if(curZoom <= 0) return;
-    //         curZoom--;
-    //         content.sca(1 + (curZoom * 0.04));
-    //         stage.update();
-    //     }
-    // });
 }
 
 var keyEvent;
@@ -289,7 +282,7 @@ function enableDrag(enable) {
     if(enable){
         game.drag({currentTarget:true});
 
-        let keyEvent = game.on("pressmove", () => {
+        keyEvent = game.on("pressmove", () => {
             if(game.x > 0) game.x = 0;
             if(game.y > 0) game.y = 0;
             if(game.x + game.width < WIDTH) game.x = WIDTH - game.width;
@@ -315,11 +308,15 @@ function resetSizeMap() {
 function setSelectPos(id) {
     for (let index = 0; index < listDriver.length; index++) {
         var driver = listDriver[index];
-        if(id == index)driver.visible = true;
+        if(id == index) driver.visible = true;
         else driver.visible = false;
     }
     this.curDriver = id + 1;
-    this.onResetAll();
+    // removeAllRoute();
+    showAbleRouteSelect();
+    mcStartPoint = null;
+    mcEndPoint = null;
+    // this.onResetAll();
 }
 
 //Function setting
@@ -345,6 +342,32 @@ function onEnableNewRound(e) {
     btnGo.alpha = 1;
     btnCome.alpha = 1;
     this.STATE = 0;
+}
+
+function onNewRound() {
+    if (isFirst && mcStartPoint && !mcEndPoint) {
+        mcStartPoint.mcAnim.visible = false;
+    }
+    mcStartPoint = null;
+    mcEndPoint = null;
+    showAbleRouteSelect();
+
+    this.onDisableNewRound();
+    btnGo.alpha = 1;
+    btnCome.alpha = 1;
+    this.STATE = 0;
+}
+
+function onGo() {
+    btnGo.alpha = 0.5;
+    btnCome.alpha = 1;
+    this.STATE = 1;
+}
+
+function onCome() {
+    btnCome.alpha = 0.5;
+    btnGo.alpha = 1;
+    this.STATE = 2;
 }
 
 function onResetAll() {
@@ -395,6 +418,7 @@ function nodeClickEvent(e) {
         mcStartPoint.mcAnim.visible = true;
         mcStartPoint.isActive = true;
         showAbleRouteSelect();
+        console.log(this.STATE);
         if (this.STATE != 0) {
             this.loadGlobalPoint();
         }
@@ -419,6 +443,33 @@ function nodeClickEvent(e) {
         }
         isFirst = false;
     }
+}
+
+function loadGlobalPoint() {
+    mcEndPoint = new createjs.MovieClip();
+    mcEndPoint.name = "global";
+    mcEndPoint.mcPoint = new createjs.MovieClip();
+    mcEndPoint.mcAnim = new createjs.MovieClip();
+    
+    var aStart = mcStartPoint.name.split("_");
+    var nameStartPoint = mcStartPoint.name;
+    var country = "global";
+    var id = "";
+    if (this.STATE == 1) {
+        id = nameStartPoint + "-" + mcEndPoint.name;
+    }else if (this.STATE == 2){
+        id =  mcEndPoint.name + "-" + nameStartPoint;
+        var temp = mcStartPoint;
+        mcStartPoint = mcEndPoint;
+        mcEndPoint = temp;
+    }
+
+    console.log('abc');
+    var curMap = getChildByID(this.mapVO.maps, country);
+    var route = getChildByID(curMap.routes, id);
+    if (route) {
+        loadRouteImage(country, route);
+    } 
 }
 
 function loadRoutePoint() {
@@ -532,26 +583,6 @@ function setAlphaRoute(alpha) {
         if(route.isActive) route.visible = true;
         if(city) city.visible = route.visible;
     });
-}
-
-function loadGlobalPoint() {
-    mcEndPoint = new createjs.MovieClip();
-    mcEndPoint.name = "global";
-    mcEndPoint.mcPoint = new createjs.MovieClip();
-    mcEndPoint.mcAnim = new createjs.MovieClip();
-    
-    var aStart = mcStartPoint.name.split("_");
-    var nameStartPoint = mcStartPoint.name;
-    var country = "global";
-    var id = "";
-    if (this.STATE == 1) {
-        id = nameStartPoint + "-" + mcEndPoint.name;
-    }else if (this.STATE == 2){
-        id =  mcEndPoint.name + "-" + nameStartPoint;
-        var temp = mcStartPoint;
-        mcStartPoint = mcEndPoint;
-        mcEndPoint = temp;
-    }
 }
 
 function showAbleRouteGlobalSelect() {
