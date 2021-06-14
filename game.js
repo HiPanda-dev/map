@@ -247,8 +247,8 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         let height = (frame.mouseY - selectY) / this.ratio;
         sel = [selectX, selectY, width, height];
 
-        let posNoteX = (width > 0 ? selectX : (selectX + width)) + 10;
-        let posNoteY = (height > 0 ? selectY + height : selectY) - 80;
+        let posNoteX = (width > 0 ? selectX : (selectX + width)) + width - 80;
+        let posNoteY = (height > 0 ? selectY : selectY - height) + 5;
         let pic = frame.asset("note.png").clone().loc(posNoteX, posNoteY).addTo(content);
 
         selectObj.c().s(red).ss(2).sd([10,10],5).dr(...sel);
@@ -422,6 +422,7 @@ function nodeClickEvent(e) {
         if (this.STATE != 0) {
             this.loadGlobalPoint();
         }
+        this.onEnableNewRound();
         isFirst = true;
     } else {
         if (mcEndPoint != movie) {
@@ -521,6 +522,7 @@ function onRemoveLine(e) {
         
         mcStartPoint = null;
         mcEndPoint = null;
+        onDisableNewRound();
         showAbleRouteSelect();
     }
 }
