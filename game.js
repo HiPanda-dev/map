@@ -47,6 +47,7 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
     this.game = _game;
     this.mcGame = game.mcGame;
     this.mcMap = game.map;
+    this.mcMap.cursor = "default";
 
     this.WIDTH = stage.width;
     this.HEIGHT = stage.height;
@@ -269,6 +270,7 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         showSettingButton(true);
         isCapture = false;
         enableDrag(true);
+        this.mcMap.cursor = "default";
         stage.update();
     });
     
@@ -439,7 +441,7 @@ function nodeClickEvent(e) {
             mcEndPoint.mcAnim.visible = false;
             mcStartPoint.mcAnim.visible = true;
             mcEndPoint = null;
-            this.removeAllRoute();
+            // this.removeAllRoute();
             this.showAbleRouteSelect();
         }
         isFirst = false;
@@ -505,6 +507,7 @@ function loadRoutePoint() {
 function onRemoveLine(e) {
     var line = new createjs.MovieClip();
     line = e.currentTarget;
+    console.log(line.getChildAt(0));
     if (RealHitTest(line.getChildAt(0), new Point(e.stageX, e.stageY))) {
         this.mcContainer.removeChild(line);
         if (listCountPoint[line.mcStartPoint.name] != null) {
@@ -523,7 +526,7 @@ function onRemoveLine(e) {
         mcStartPoint = null;
         mcEndPoint = null;
         onDisableNewRound();
-        showAbleRouteSelect();
+        // showAbleRouteSelect();
     }
 }
 
@@ -613,7 +616,7 @@ function showAbleRouteGlobalSelect() {
 
 function removeAllRoute() {
     this.mcContainer.removeAllChildren();
-    // if (container.numChildren != 0) container.removeChildren(0, container.numChildren - 1);
+    // if (this.mcContainer.numChildren != 0) this.mcContainer.removeChild(0, this.mcContainer.numChildren - 1);
 }
 
 function loadRouteImage(country, route) { //country:String, route:RouteVO
@@ -751,8 +754,9 @@ function getCurPosByIdDriver(driver, id) {
 }
 
 function RealHitTest(object, point) {
-    lpos = object.globalToLocal(point.x, point.y);
-    return !(stage.mouseInBounds && object.hitTest(lpos.x, lpos.y));
+    // let lpos = object.globalToLocal(point.x, point.y);
+    // return !(stage.mouseInBounds && object.hitTest(lpos.x, lpos.y));
+    return true;
 }
 
 //Class
