@@ -59,7 +59,7 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
     game.x = (this.WIDTH - this.GAME_WIDTH * ratio) / 2;
 
     var handleScroll = function (e) {
-        if(e.wheelDelta < 0){
+        if(e.deltaY < 0){
             if(this.curZoom <= 0) return;
             this.curZoom--;
         }else{
@@ -67,7 +67,7 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
             this.curZoom++;
         }
 
-        var delta = e.wheelDelta ? e.wheelDelta/1000 : e.detail ? -e.detail : 0;
+        var delta = e.deltaY ? e.deltaY/1000 : e.detail ? -e.detail : 0;
         var p = game.globalToLocal(stage.mouseX, stage.mouseY);
         ratio = Math.max(0.0001, Math.min(game.scaleX + delta, 3));
         
@@ -83,12 +83,12 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         if(game.y > 0) game.y = 0;
         if(game.x + game.width < WIDTH) game.x = WIDTH - game.width;
         if(game.y + game.height < HEIGHT) game.y = HEIGHT - game.height;
-
         stage.update();
     }.bind(this);
     
-    this.stage.canvas.addEventListener('DOMMouseScroll', handleScroll, false);
+    // this.stage.canvas.addEventListener('DOMMouseScroll', handleScroll, false);
     this.stage.canvas.addEventListener('mousewheel', handleScroll, false);
+    this.stage.canvas.addEventListener('wheel', handleScroll, false);
 
     //init driver
     for (let index = 0; index < 6; index++) {
