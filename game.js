@@ -260,7 +260,10 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         selectObj.c();
         sel = null;
         const loader = new Loader();
-        loader.save(copy);
+        loader.save({
+            content: copy,
+            type: "jpeg",
+        });
 
         pic.removeFrom(content);
         game.scaleX = game.scaleY = ratio;
