@@ -230,9 +230,15 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         if(!isCapture) return;
         this.startCapture = true;
         sel = [selectX, selectY, frame.mouseX - selectX, frame.mouseY - selectY];
+
+        console.log("wh: " + (frame.mouseX - selectX) + "x" + (frame.mouseY - selectY))
+
         selectObj.c().s(red).ss(2).sd([10,10],5).dr(...sel);
 		stage.update();
 	});
+
+ 
+
     content.on("pressup", () => {
         if(!startCapture) return;
         startCapture = false;
@@ -247,7 +253,7 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         let width = (frame.mouseX - selectX) / this.ratio;
         let height = (frame.mouseY - selectY) / this.ratio;
         sel = [selectX, selectY, width, height];
-
+        console.log("wh: " + width + "x" + height)
        
 
         let posNoteX = (width > 0 ? selectX : (selectX + width)) + width - 380;
@@ -261,6 +267,17 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         else if (height > 2000){
             pic.scaleX = pic.scaleY = 1.2;
             pic.x = posNoteX - 80;
+        }
+
+        if (this.detectBrowser() === "Firefox") {
+            if (height < 1000) {
+                pic.scaleX = pic.scaleY = 0.5;
+                pic.x = posNoteX + 240;
+            } else if (height > 2000) {
+                pic.x = posNoteX + 60;
+            }else{
+                pic.x = posNoteX + 100;
+            }
         }
 
         selectObj.c().s(red).ss(2).sd([10,10],5).dr(...sel);
@@ -291,6 +308,22 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
     this.setSelectPos(3);
 
     enableDrag(true);
+}
+
+function detectBrowser() {
+    if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
+        return 'Opera';
+    } else if (navigator.userAgent.indexOf("Chrome") != -1) {
+        return 'Chrome';
+    } else if (navigator.userAgent.indexOf("Safari") != -1) {
+        return 'Safari';
+    } else if (navigator.userAgent.indexOf("Firefox") != -1) {
+        return 'Firefox';
+    } else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.documentMode == true)) {
+        return 'IE';//crap
+    } else {
+        return 'Unknown';
+    }
 }
 
 var keyEvent;
