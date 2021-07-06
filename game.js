@@ -248,7 +248,7 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         let height = (frame.mouseY - selectY) / this.ratio;
         sel = [selectX, selectY, width, height];
 
-        let posNoteX = (width > 0 ? selectX : (selectX + width)) + width - 80;
+        let posNoteX = (width > 0 ? selectX : (selectX + width)) + width - 155;
         let posNoteY = (height > 0 ? selectY : selectY - height) + 5;
         let pic = frame.asset("note.png").clone().loc(posNoteX, posNoteY).addTo(content);
 
