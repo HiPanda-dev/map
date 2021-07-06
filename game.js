@@ -248,9 +248,20 @@ function showGame(_lib, _game, _stage, _content, _frame, _gameWidth, _gameHeight
         let height = (frame.mouseY - selectY) / this.ratio;
         sel = [selectX, selectY, width, height];
 
-        let posNoteX = (width > 0 ? selectX : (selectX + width)) + width - 155;
+       
+
+        let posNoteX = (width > 0 ? selectX : (selectX + width)) + width - 380;
         let posNoteY = (height > 0 ? selectY : selectY - height) + 5;
         let pic = frame.asset("note.png").clone().loc(posNoteX, posNoteY).addTo(content);
+        if (height < 1000) {
+            pic.scaleX = pic.scaleY = 0.5;
+            pic.x = posNoteX + 190;
+        }
+
+        else if (height > 2000){
+            pic.scaleX = pic.scaleY = 1.2;
+            pic.x = posNoteX - 80;
+        }
 
         selectObj.c().s(red).ss(2).sd([10,10],5).dr(...sel);
         let snap = content.cache(...sel).cacheCanvas;
